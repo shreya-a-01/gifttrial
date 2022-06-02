@@ -104,7 +104,7 @@
     
 		<script>
 			document.getElementById('light-on').addEventListener('click', function() {
-				var ts_api_key = document.getElementById('ts-api-key').value;
+				
 				var url = "https://api.thingspeak.com/update?api_key=8D41NQ3X0BQFAI5G&field1=1"
 				$.getJSON(url, function(data) {
 					console.log(data);
@@ -112,7 +112,7 @@
 			});
 		
 			document.getElementById('light-off').addEventListener('click', function() {
-				var ts_api_key = document.getElementById('ts-api-key').value;
+			
 				var url = "https://api.thingspeak.com/update?api_key=8D41NQ3X0BQFAI5G&field1=0"
 				$.getJSON(url, function(data) {
 					console.log(data);
