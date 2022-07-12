@@ -1,76 +1,82 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
+
 <head>
-<script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LED</title>
+    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+    <style>
+        body {
+            text-align: center;
+        }
+
+        button {
+            margin: auto 10px;
+            display: inline-block;
+        }
+    </style>
 </head>
+
 <body>
-    <button type="button" id="light-on" class="buttonON" onclick="on()">Light ON</button>
-    <button type="button" id="light-off" class="buttonOFF" onclick="off()">Light OFF</button><br>
+    <h1>LED MODE</h1>
+    <button class="led-mode" type="button" data-topic="Rain">Good Morning</button>
+    <button class="led-mode" type="button" data-topic="Rain Stripes">Good Afternoon</button>
+    <button class="led-mode" type="button" data-topic="Cloud">Good Night</button>
+    <button class="led-mode" type="button" data-topic="Ocean">My Dreams</button>
+    <button class="led-mode" type="button" data-topic="Forest">I Love You</button>
+    <button class="led-mode" type="button" data-topic="Lava">I Miss You</button>
+    <button class="led-mode" type="button" data-topic="Party">Have Funss</button>
+    <button class="led-mode" type="button" data-topic="PurpleAndGreen">Can't wait to see you</button>
+    <button class="led-mode" type="button" data-topic="Yellow">My Forever</button>
+    <button class="led-mode" type="button" data-topic="Black">Bubye!!!</button>
 </body>
 
 <script>
-    // Globally initializes an mqtt variable
-    console.log(mqtt)
+    const clientId = 'mqttjs_' + Math.random().toString(16).substr(2, 8);
+    const host = 'ws://broker.mqttdashboard.com:8000/mqtt';
+    const options = {
+        keepalive: 60,
+        clientId: clientId,
+        protocolId: 'MQTT',
+        protocolVersion: 4,
+        clean: true,
+        reconnectPeriod: 1000,
+        connectTimeout: 30 * 1000,
+        will: {
+            topic: 'WillMsg',
+            payload: 'Connection Closed abnormally..!',
+            qos: 0,
+            retain: false
+        }
+    };
+    console.log('Connecting mqtt client');
+    const client = mqtt.connect(host, options);
 
+    client.on('error', (err) => {
+        console.log('Connection error: ', err);
+        client.end();
+    }).on('reconnect', () => {
+        console.log('Reconnecting')
+    }).on('connect', () => {
+        console.log('Connected');
+    }).on('message', (topic, message, packet) => {
+        // Received
+        console.log('Received message from topic: ' + topic);
+        console.log('Message: ' + message.toString());
+    });
 
-    function on() {
-        console.log(on)
-        client.publish('gifttrail/bulb', '1', { qos: 0, retain: false })
-
-    }
-
-    function off() {
-        console.log(off)
-        client.publish('gifttrail/bulb', '0', { qos: 0, retain: false })
-
-    }
-
-
-
-    const clientId = 'mqttjs_' + Math.random().toString(16).substr(2, 8)
-
-const host = 'wss://broker.mqttdashboard.com:8000/mqtt'
-
-const options = {
-  keepalive: 60,
-  clientId: clientId,
-  protocolId: 'MQTT',
-  protocolVersion: 4,
-  clean: true,
-  reconnectPeriod: 1000,
-  connectTimeout: 30 * 1000,
-  will: {
-    topic: 'WillMsg',
-    payload: 'Connection Closed abnormally..!',
-    qos: 0,
-    retain: false
-  },
-}
-
-console.log('Connecting mqtt client')
-const client = mqtt.connect(host, options)
-
-client.on('error', (err) => {
-  console.log('Connection error: ', err)
-  client.end()
-})
-
-client.on('reconnect', () => {
-  console.log('Reconnecting...')
-})
-
-client.on('connect', () => {
-  console.log('Client connected:' + clientId)
-  // Subscribe
-  client.subscribe('gifttrail/bulb', { qos: 0 })
-})
-
-// Received
-client.on('message', (topic, message, packet) => {
-  console.log('Received Message: ' + message.toString() + '\nOn topic: ' + topic)
-})
-
-
+    document.querySelectorAll('.led-mode').forEach(button => {
+        button.addEventListener('click', () => {
+            const type = button.getAttribute('data-topic');
+            console.log('Sending message: ' + type);
+            client.publish('gifttrail/bulb', type, {
+                qos: 0,
+                retain: false
+            });
+        });
+    });
 </script>
-
 
 </html>
